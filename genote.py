@@ -6,7 +6,7 @@ def replace_last_occurence(s, old, new):
     return new.join(li)
 
 def gff(seqname, source, feature, start, end, score, strand, frame, attribute):
-    s = '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t\n'
+    s = '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\n'
     return s.format(seqname, source,feature, start, end, score, strand, frame,
                     attribute)
 
