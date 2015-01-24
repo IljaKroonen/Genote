@@ -10,7 +10,6 @@ def gff(seqname, source, feature, start, end, score, strand, frame, attribute):
     return s.format(seqname, source,feature, start, end, score, strand, frame,
                     attribute)
 
-
 def line_to_gff(line):
     spl = sub(' +', ' ', line).strip().split(' ')
     seqname = spl[4]
@@ -30,7 +29,7 @@ if not argv[1].endswith('.out'):
     exit(2)
 
 output_file = replace_last_occurence(argv[1], '.out', '.gff')
-    
+
 with open(argv[1], 'r') as i: 
     with open(output_file, 'w') as o:
         i.readline()
