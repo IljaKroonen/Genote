@@ -1,87 +1,41 @@
-from time import sleep
 from re import sub
 from sys import argv, exit
 
-from autopy.mouse import click, move, toggle
-from autopy.key import tap, MOD_SHIFT, MOD_CONTROL, K_DELETE
+def replace_last_occurence(s, old, new):
+    li = s.rsplit(old, 1)
+    return new.join(li)
 
-BEGIN_X = 900
-BEGIN_Y = 500
-END_X = 1000
-END_Y = 500
-def select_sequence_portion():
-    move(BEGIN_X, BEGIN_Y)
-    toggle(True)
-    move(END_X, END_Y)
-    toggle(False)
-    sleep(0.1)
+def gff(seqname, source, feature, start, end, score, strand, frame, attribute):
+    s = '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t\n'
+    return s.format(seqname, source,feature, start, end, score, strand, frame,
+                    attribute)
 
-BUTTON_X = 1100
-BUTTON_Y = 85
-def click_annotate_button():
-    move(BUTTON_X, BUTTON_Y)
-    click()
-    sleep(0.1)
 
-def type_string(s):
-    i = 0
-    while i < len(s):
-        if s[i].isdigit() or s[i] == "/":
-            tap(s[i], MOD_SHIFT)
-        else:
-            tap(s[i])
-        i = i + 1
-    sleep(0.1)
-
-INTERVAL_X = 1100
-INTERVAL_Y = 450
-def double_click_interval():
-    move(INTERVAL_X, INTERVAL_Y)
-    click()
-    move(INTERVAL_X, INTERVAL_Y)
-    click()
-    sleep(0.1)
-
-def ok():
-    tap('\n')
-    sleep(0.1)
-    tap('\n')
-    sleep(0.1)
-
-def tab():
-    tap('\t')
-    sleep(0.1)
-
-def clear_field():
-    tap('a', MOD_CONTROL)
-    tap(K_DELETE)
-    sleep(0.1)
-
-def process(begin, end, name, family):
-    select_sequence_portion()
-    click_annotate_button()
-    type_string(name)
-    tab()
-    clear_field()
-    type_string(family)
-    double_click_interval()
-    type_string(str(begin))
-    tab()
-    tab()
-    clear_field()
-    type_string(str(end))
-    ok()
+def line_to_gff(line):
+    spl = sub(' +', ' ', line).strip().split(' ')
+    seqname = spl[4]
+    start = spl[5]
+    end = spl[6]
+    name = spl[9]
+    family = spl[10]
+    return gff(seqname, 'Genote', family, start, end, '.', '.', '.',
+               'Name={0}'.format(name))
 
 if len(argv) != 2:
     print 'Usage: ./launch target_file'
     exit(1)
+
+if not argv[1].endswith('.out'):
+    print 'Must input .out file'
+    exit(2)
+
+output_file = replace_last_occurence(argv[1], '.out', '.gff')
     
-with open(argv[1], 'r') as f:
-    f.readline()
-    f.readline()
-    f.readline()
-    
-    for line in f:
-        spl = sub(' +', ' ', line).strip().split(' ')
-        print
-        process(int(spl[5]), int(spl[6]), spl[9], spl[10])
+with open(argv[1], 'r') as i: 
+    with open(output_file, 'w') as o:
+        i.readline()
+        i.readline()
+        i.readline()
+        
+        for line in i:
+            o.write(line_to_gff(line))
